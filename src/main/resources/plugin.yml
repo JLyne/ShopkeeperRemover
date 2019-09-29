@@ -1,0 +1,7 @@
+name: ShopkeeperRemover
+version: 1.0
+author: Jim
+description: Plugin that removes shopkeepers from unrented regions
+
+main: uk.co.notnull.ShopkeeperRemover.ShopkeeperRemover
+api-version: "1.13"
