@@ -12,8 +12,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ShopkeeperRemover extends JavaPlugin implements Listener {
 
@@ -30,10 +30,9 @@ public class ShopkeeperRemover extends JavaPlugin implements Listener {
     public void unrentedRegionEvent(UnrentedRegionEvent event) {
         ProtectedRegion region = event.getRegion().getRegion();
 
-        getLogger().info("Region " + event.getRegion().getName() + " unrented");
+        getLogger().info("Removing shopkeepers in unrented region");
 
         if(region == null) {
-            getLogger().info("Region is null for some reason");
             return;
         }
 
@@ -41,21 +40,20 @@ public class ShopkeeperRemover extends JavaPlugin implements Listener {
         new BukkitRunnable() {
             @Override
             public void run() {
+                AtomicInteger removed = new AtomicInteger();
                 ShopkeeperRegistry registry = ShopkeepersAPI.getShopkeeperRegistry();
 
                 World world = event.getRegion().getWorld();
                 List<? extends Shopkeeper> shopkeepers = registry.getShopkeepersInWorld(world, false);
 
-                getLogger().info("Checking shopkeepers");
-
                 shopkeepers.forEach(shopkeeper -> {
-                    getLogger().info("Checking shopkeeper " + shopkeeper.getName());
-
                     if(region.contains(shopkeeper.getX(), shopkeeper.getY(), shopkeeper.getZ())) {
-                        getLogger().info("Sshopkeeper " + shopkeeper.getName() + " is within region, deleting");
                         shopkeeper.delete();
+                        removed.getAndIncrement();
                     }
                 });
+
+                getLogger().info("Removed " + removed.get() + " shopkeepers");
             }
         }.runTaskLater(this, 10);
     }
